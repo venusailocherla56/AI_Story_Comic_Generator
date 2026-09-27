@@ -1,35 +1,30 @@
-
+import os
 import json
-import requests
+from google import genai
 
-
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "llama3.2"
-
+# Gemini automatically uses GEMINI_API_KEY
+# from the environment variable.
+client = genai.Client()
 
 def generate_story(story_idea, genre, num_scenes, characters):
 
     prompt = f"""
-You are a professional creative story writer.
+You are a creative story writer.
 
-Write one original, complete {genre} story based on this idea:
+Create an original {genre} story based on this idea:
+
 {story_idea}
 
-Characters provided by the user:
+Characters:
 {characters}
 
-Create exactly {num_scenes} scenes.
+Generate exactly {num_scenes} scenes.
 
-Requirements:
-- Write a short, engaging story.
-- Keep the story around 250-350 words.
-- Make the story original and logically consistent.
-- Do not repeat paragraphs or sentences.
-- Do not include explanations, introductions, or suggestions.
-- Return only the requested JSON.
-- Make each scene part of the same story.
+Return ONLY valid JSON.
+Do not use markdown.
+Do not put ``` around the JSON.
 
-Return valid JSON in this structure:
+Use exactly this structure:
 
 {{
     "title": "Story title",
@@ -51,19 +46,23 @@ Return valid JSON in this structure:
 }}
 """
 
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL_NAME,
-            "prompt": prompt,
-            "stream": False,
-            "format": "json"
-        },
-        timeout=300
+    response = client.models.generate_content(
+        model="gemini-3.8-flash",
+        contents=prompt
     )
 
-    response.raise_for_status()
+    result = response.text.strip()
 
-    result = response.json()["response"]
+    # Remove accidental markdown code fences
+    if result.startswith("```json"):
+        result = result[7:]
+
+    if result.startswith("```"):
+        result = result[3:]
+
+    if result.endswith("```"):
+        result = result[:-3]
+
+    result = result.strip()
 
     return json.loads(result)
