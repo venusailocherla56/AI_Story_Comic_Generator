@@ -1,11 +1,14 @@
 import os
-import json
+from pathlib import Path
+from dotenv import load_dotenv
 from google import genai
 
-# Gemini automatically uses GEMINI_API_KEY
-# from the environment variable.
-client = genai.Client()
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ENV_FILE = PROJECT_ROOT / ".env"
 
+load_dotenv(ENV_FILE)
+
+client = genai.Client()
 def generate_story(story_idea, genre, num_scenes, characters):
 
     prompt = f"""
