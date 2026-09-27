@@ -463,12 +463,11 @@
 
         try {
             const response = await fetch(
-                "https://egomaniac-impish-unrelated.ngrok-free.app/generate-story",
+                "https://ai-story-comic-generator-1.onrender.com/generate-story",
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
-                    },
+                        "Content-Type": "application/json"                    },
                     body: JSON.stringify({
                         story_idea: storyIdea,
                         genre: genre,
